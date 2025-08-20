@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Rajrajeshwari Women's Freedom Policy Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            text-align: center;
+            color: #005f73;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin: 8px 0 4px;
+            color: #005f73;
+        }
+        input, select {
+            padding: 10px;
+            margin-bottom: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00a8e8;
+            box-shadow: 0 0 5px rgba(0,168,232,0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #005f73;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #f9f9f9;
+        }
+        tr:nth-child(odd) td {
+            background-color: #ffffff;
+        }
+        .error {
+            color: #d00000;
+            font-size: 0.85em;
+            margin-top: 2px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e6f3ff;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #00a8e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0077b6;
+        }
+        .add-btn {
+            background-color: #009b77;
+        }
+        .add-btn:hover {
+            background-color: #007a5e;
+        }
+        .remove-btn {
+            background-color: #d00000;
+        }
+        .remove-btn:hover {
+            background-color: #a30000;
+        }
+        .optional-covers label {
+            display: block;
+            margin: 5px 0;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            table, th, td {
+                font-size: 0.9em;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>National Rajrajeshwari Women's Freedom Policy Calculator</h2>
+        <div class="section">
+            <label>Policy Type</label>
+            <select id="policyType" onchange="togglePolicyFields()">
+                <option value="individual">Individual</option>
+                <option value="group">Group</option>
+            </select>
+        </div>
+        <div class="section">
+            <label>Policy Year</label>
+            <select id="policyYear">
+                <option value="1">1 Year</option>
+                <option value="2">2 Years</option>
+                <option value="3">3 Years</option>
+            </select>
+        </div>
+        <div id="individualFields" class="section">
+            <h3>Members (Max 4)</h3>
+            <table id="memberTable">
+                <thead>
+                    <tr>
+                        <th>Sl. No.</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Relationship</th>
+                        <th>Occupation</th>
+                        <th>Optional Covers</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" class="member-name" required></td>
+                        <td>
+                            <input type="number" class="member-age" min="18" max="99" required oninput="validateAge(0)">
+                            <div class="error"></div>
+                        </td>
+                        <td>
+                            <select class="member-relationship" disabled>
+                                <option value="Self">Self</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="member-occupation">
+                                <option value="Student">Student</option>
+                                <option value="Employed">Employed</option>
+                                <option value="Others">Others</option>
+                                <option value="Housewife">Housewife</option>
+                            </select>
+                        </td>
+                        <td><div class="optional-covers"></div></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="add-btn" onclick="addMember()">Add Member</button>
+        </div>
+        <div id="groupFields" class="section" style="display: none;">
+            <label>Number of Members <= 18</label>
+            <input type="number" id="membersUpto18" min="0" value="0">
+            <label>Number of Members >= 19</label>
+            <input type="number" id="membersAbove18" min="0" value="0">
+            <div id="groupError" class="error"></div>
+        </div>
+        <div class="section">
+            <label><input type="checkbox" id="noIntermediary"> No Intermediary (10% Discount)</label>
+        </div>
+        <button onclick="calculatePremium()">Calculate Premium</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        let memberCount = 1;
+
+        function togglePolicyFields() {
+            const policyType = document.getElementById('policyType').value;
+            document.getElementById('individualFields').style.display = policyType === 'individual' ? 'block' : 'none';
+            document.getElementById('groupFields').style.display = policyType === 'group' ? 'block' : 'none';
+            updateOptionalCovers();
+        }
+
+        function addMember() {
+            if (memberCount >= 4) {
+                alert('Maximum 4 members allowed.');
+                return;
+            }
+            const relationships = new Set();
+            document.querySelectorAll('.member-relationship').forEach(r => relationships.add(r.value));
+            const availableRelationships = ['Daughter', 'Sister', 'Mother'].filter(r => r === 'Daughter' || r === 'Sister' || !relationships.has(r));
+            if (availableRelationships.length === 0) {
+                alert('Cannot add more members: Only Daughter and Sister can be added multiple times.');
+                return;
+            }
+            memberCount++;
+            const tbody = document.querySelector('#memberTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${memberCount}</td>
+                <td><input type="text" class="member-name" required></td>
+                <td>
+                    <input type="number" class="member-age" min="1" required oninput="validateAge(${memberCount - 1})">
+                    <div class="error"></div>
+                </td>
+                <td>
+                    <select class="member-relationship" required onchange="validateRelationships()">
+                        ${availableRelationships.map(r => `<option value="${r}">${r}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="member-occupation">
+                        <option value="Student">Student</option>
+                        <option value="Employed">Employed</option>
+                        <option value="Others">Others</option>
+                        <option value="Housewife">Housewife</option>
+                    </select>
+                </td>
+                <td><div class="optional-covers"></div></td>
+                <td><button class="remove-btn" onclick="removeMember(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            updateOptionalCovers();
+        }
+
+        function removeMember(button) {
+            if (memberCount <= 1) return;
+            button.parentElement.parentElement.remove();
+            memberCount--;
+            const rows = document.querySelectorAll('#memberTable tbody tr');
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+                row.querySelector('.member-age').oninput = () => validateAge(index);
+            });
+            validateRelationships();
+            updateOptionalCovers();
+        }
+
+        function validateRelationships() {
+            const relationships = new Set();
+            const rows = document.querySelectorAll('#memberTable tbody tr');
+            let hasError = false;
+            rows.forEach((row, index) => {
+                const relationship = row.querySelector('.member-relationship').value;
+                if (index === 0 && relationship !== 'Self') {
+                    alert('First member must be Self.');
+                    hasError = true;
+                } else if (relationship === 'Self' && index !== 0) {
+                    alert('Self can only be the first member.');
+                    hasError = true;
+                } else if (relationship === 'Mother' && relationships.has('Mother')) {
+                    alert('Mother can only be added once.');
+                    hasError = true;
+                }
+                relationships.add(relationship);
+            });
+            return !hasError;
+        }
+
+        function validateAge(index) {
+            const rows = document.querySelectorAll('#memberTable tbody tr');
+            const ageInput = rows[index].querySelector('.member-age');
+            const relationship = rows[index].querySelector('.member-relationship').value;
+            const selfAge = parseInt(rows[0].querySelector('.member-age').value) || 0;
+            let error = '';
+
+            if (index === 0) {
+                const age = parseInt(ageInput.value);
+                if (age < 18 || age > 99) {
+                    error = 'Self age must be 18-99.';
+                } else if (age > 75) {
+                    error = 'Entry age must be 18-75 only.';
+                }
+            } else {
+                const age = parseInt(ageInput.value);
+                if (relationship === 'Daughter' && (age < 1 || age >= selfAge)) {
+                    error = `Daughter's age must be 1 to ${selfAge - 1}.`;
+                } else if (relationship === 'Sister' && (age < 1 || Math.abs(age - selfAge) > 20)) {
+                    error = `Sister's age must be within 20 years of Self's age (${selfAge}).`;
+                } else if (relationship === 'Mother' && age <= selfAge) {
+                    error = `Mother's age must be greater than Self's age (${selfAge}).`;
+                }
+            }
+
+            ageInput.nextElementSibling.textContent = error;
+            updateOptionalCovers();
+        }
+
+        function updateOptionalCovers() {
+            const rows = document.querySelectorAll('#memberTable tbody tr');
+            rows.forEach((row, index) => {
+                const age = parseInt(row.querySelector('.member-age').value) || 0;
+                const coversDiv = row.querySelector('.optional-covers');
+                const isUpto18 = age <= 18;
+                coversDiv.innerHTML = `
+                    <label><input type="checkbox" class="optional-cover" data-type="critical"> 11 Critical Illness</label>
+                    <label><input type="checkbox" class="optional-cover" data-type="dailyCash"> Daily Cash Allowance</label>
+                    <label><input type="checkbox" class="optional-cover" data-type="funeral"> Funeral/Transportation</label>
+                    ${!isUpto18 ? `
+                    <label><input type="checkbox" class="optional-cover" data-type="ttd"> TTD Resulting Hospitalization</label>
+                    <label><input type="checkbox" class="optional-cover" data-type="divorce"> Legally Divorce</label>
+                    <label><input type="checkbox" class="optional-cover" data-type="education"> Children Education</label>
+                    <label><input type="checkbox" class="optional-cover" data-type="household"> Loss of Household Goods</label>
+                    ` : ''}
+                `;
+            });
+        }
+
+        function calculatePremium() {
+            const policyType = document.getElementById('policyType').value;
+            const policyYear = parseInt(document.getElementById('policyYear').value);
+            const noIntermediary = document.getElementById('noIntermediary').checked;
+            let basePremium = 0;
+            let optionalPremium = 0;
+            let familyDiscount = 0;
+            let groupDiscount = 0;
+            let noIntermediaryDiscount = 0;
+            let longTermDiscount = 0;
+            let totalPremium = 0;
+            let gst = 0;
+            let breakdownHtml = '';
+
+            if (policyType === 'individual') {
+                const rows = document.querySelectorAll('#memberTable tbody tr');
+                if (rows.length < 1) {
+                    alert('At least one member (Self) is required.');
+                    return;
+                }
+                if (!validateRelationships()) return;
+                let selfAge = 0;
+                breakdownHtml = '<tr><th>Member</th><th>Base Premium (Rs.)</th><th>Optional Covers (Rs.)</th></tr>';
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const age = parseInt(row.querySelector('.member-age').value) || 0;
+                    const relationship = row.querySelector('.member-relationship').value;
+                    const name = row.querySelector('.member-name').value.trim();
+                    if (!name) {
+                        alert(`Name is required for member ${i + 1}.`);
+                        return;
+                    }
+                    if (i === 0) {
+                        if (age < 18 || age > 99) {
+                            alert('Self age must be 18-99.');
+                            return;
+                        }
+                        selfAge = age;
+                    } else {
+                        if (relationship === 'Daughter' && (age < 1 || age >= selfAge)) {
+                            alert(`Daughter's age must be 1 to ${selfAge - 1}.`);
+                            return;
+                        }
+                        if (relationship === 'Sister' && (age < 1 || Math.abs(age - selfAge) > 20)) {
+                            alert(`Sister's age must be within 20 years of Self's age (${selfAge}).`);
+                            return;
+                        }
+                        if (relationship === 'Mother' && age <= selfAge) {
+                            alert(`Mother's age must be greater than Self's age (${selfAge}).`);
+                            return;
+                        }
+                    }
+                    const memberBase = age <= 18 ? 20 : 60;
+                    basePremium += memberBase;
+                    let memberOptional = 0;
+                    const covers = row.querySelectorAll('.optional-cover:checked');
+                    const coverNames = [];
+                    covers.forEach(cover => {
+                        const type = cover.dataset.type;
+                        if (age <= 18) {
+                            if (type === 'critical') { memberOptional += 25; coverNames.push('11 Critical Illness'); }
+                            else if (type === 'dailyCash') { memberOptional += 45; coverNames.push('Daily Cash Allowance'); }
+                            else if (type === 'funeral') { memberOptional += 5; coverNames.push('Funeral/Transportation'); }
+                        } else {
+                            if (type === 'critical') { memberOptional += 70; coverNames.push('11 Critical Illness'); }
+                            else if (type === 'dailyCash') { memberOptional += 175; coverNames.push('Daily Cash Allowance'); }
+                            else if (type === 'funeral') { memberOptional += 10; coverNames.push('Funeral/Transportation'); }
+                            else if (type === 'ttd') { memberOptional += 40; coverNames.push('TTD Hospitalization'); }
+                            else if (type === 'divorce') { memberOptional += 110; coverNames.push('Legally Divorce'); }
+                            else if (type === 'education') { memberOptional += 15; coverNames.push('Children Education'); }
+                            else if (type === 'household') { memberOptional += 70; coverNames.push('Loss of Household Goods'); }
+                        }
+                    });
+                    optionalPremium += memberOptional;
+                    breakdownHtml += `<tr><td>${name} (${relationship})</td><td>${memberBase.toFixed(2)}</td><td>${memberOptional.toFixed(2)} (${coverNames.join(', ') || 'None'})</td></tr>`;
+                }
+                if (rows.length >= 2) {
+                    familyDiscount = (basePremium + optionalPremium) * 0.1;
+                }
+            } else {
+                const membersUpto18 = parseInt(document.getElementById('membersUpto18').value) || 0;
+                const membersAbove18 = parseInt(document.getElementById('membersAbove18').value) || 0;
+                const totalMembers = membersUpto18 + membersAbove18;
+                if (totalMembers < 2) {
+                    document.getElementById('groupError').textContent = 'Group policy requires at least 2 members.';
+                    return;
+                } else {
+                    document.getElementById('groupError').textContent = '';
+                }
+                basePremium = (membersUpto18 * 20) + (membersAbove18 * 60);
+                let groupDiscountRate = 0;
+                if (totalMembers <= 25) groupDiscountRate = 0;
+                else if (totalMembers <= 50) groupDiscountRate = 2.5;
+                else if (totalMembers <= 100) groupDiscountRate = 5;
+                else if (totalMembers <= 250) groupDiscountRate = 10;
+                else if (totalMembers <= 500) groupDiscountRate = 15;
+                else if (totalMembers <= 2000) groupDiscountRate = 20;
+                else if (totalMembers <= 5000) groupDiscountRate = 25;
+                else groupDiscountRate = 30;
+                groupDiscount = basePremium * (groupDiscountRate / 100);
+                breakdownHtml = `
+                    <tr><th>Description</th><th>Amount (Rs.)</th></tr>
+                    <tr><td>Members <= 18 (${membersUpto18} x Rs. 20)</td><td>${(membersUpto18 * 20).toFixed(2)}</td></tr>
+                    <tr><td>Members >= 19 (${membersAbove18} x Rs. 60)</td><td>${(membersAbove18 * 60).toFixed(2)}</td></tr>
+                `;
+            }
+
+            let yearlyPremium = basePremium + optionalPremium - (familyDiscount || groupDiscount);
+            if (noIntermediary) {
+                noIntermediaryDiscount = yearlyPremium * 0.1;
+                yearlyPremium -= noIntermediaryDiscount;
+            }
+            totalPremium = yearlyPremium * policyYear;
+            if (policyYear === 2) {
+                longTermDiscount = totalPremium * 0.055;
+            } else if (policyYear === 3) {
+                longTermDiscount = totalPremium * 0.09;
+            }
+            totalPremium -= longTermDiscount;
+            gst = totalPremium * 0.18;
+            totalPremium += gst;
+
+            document.getElementById('result').innerHTML = `
+                <h3>Premium Breakdown</h3>
+                <table>${breakdownHtml}</table>
+                <table style="margin-top: 10px;">
+                    <tr><th>Description</th><th>Amount (Rs.)</th></tr>
+                    <tr><td>Total Base Premium</td><td>${basePremium.toFixed(2)}</td></tr>
+                    ${optionalPremium ? `<tr><td>Total Optional Covers</td><td>${optionalPremium.toFixed(2)}</td></tr>` : ''}
+                    ${familyDiscount ? `<tr><td>Family Discount (10%)</td><td>-${familyDiscount.toFixed(2)}</td></tr>` : ''}
+                    ${groupDiscount ? `<tr><td>Group Discount (${groupDiscountRate}%)</td><td>-${groupDiscount.toFixed(2)}</td></tr>` : ''}
+                    ${noIntermediaryDiscount ? `<tr><td>No Intermediary Discount (10%)</td><td>-${noIntermediaryDiscount.toFixed(2)}</td></tr>` : ''}
+                    <tr><td>Yearly Premium</td><td>${yearlyPremium.toFixed(2)}</td></tr>
+                    <tr><td>Total for ${policyYear} Year${policyYear > 1 ? 's' : ''}</td><td>${(yearlyPremium * policyYear).toFixed(2)}</td></tr>
+                    ${longTermDiscount ? `<tr><td>Long-Term Discount (${policyYear === 2 ? '5.5' : '9'}%)</td><td>-${longTermDiscount.toFixed(2)}</td></tr>` : ''}
+                    <tr><td>GST (18%)</td><td>${gst.toFixed(2)}</td></tr>
+                    <tr><td><strong>Total Premium</strong></td><td><strong>${totalPremium.toFixed(2)}</strong></td></tr>
+                </table>
+                <div class="note">Note: Calculated as (Base + Optional Covers - Family/Group Discount - No Intermediary Discount) × Years - Long-Term Discount + GST</div>
+            `;
+        }
+    </script>
+</body>
+</html>
