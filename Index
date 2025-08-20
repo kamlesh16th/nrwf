@@ -470,9 +470,10 @@
                     <tr><td>GST (18%)</td><td>${gst.toFixed(2)}</td></tr>
                     <tr><td><strong>Total Premium</strong></td><td><strong>${totalPremium.toFixed(2)}</strong></td></tr>
                 </table>
-                <div class="note">Note: Calculated as (Base + Optional Covers - Family/Group Discount - No Intermediary Discount) × Years - Long-Term Discount + GST</div>
+                <div class="note">Note: Calculated as (Base + Optional Covers - Family/Group Discount - No Intermediary Discount) Ã— Years - Long-Term Discount + GST</div>
             `;
         }
     </script>
 </body>
+
 </html>
